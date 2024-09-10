@@ -1,4 +1,4 @@
-package org.example.pluto;
+package org.example.pluto.servlets;
 
 import java.io.*;
 import javax.servlet.http.*;
