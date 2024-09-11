@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import org.example.pluto.common.GetProductsLambdaFunction;
 import org.example.pluto.config.Constants;
 import org.example.pluto.model.Product;
+import org.example.pluto.model.ProductSearchWrapper;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -18,7 +19,6 @@ import java.util.ArrayList;
 @WebServlet(name = "GetProducts", value = "/GetProducts/*")
 public class GetProducts extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        System.out.println(request.getPathInfo());
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
@@ -34,9 +34,16 @@ public class GetProducts extends HttpServlet {
         String[] search_key = getSearchKey(request.getPathInfo());
         if(search_key == null || search_key.length == 0)
             response.getWriter().println((new Gson()).toJson(products));
-        else
-            response.getWriter().println((new Gson()).toJson(search_key));
-
+        else {
+            ArrayList<ProductSearchWrapper> productSearchWrappers = new ArrayList<>();
+            for (Product product : products) {
+                ProductSearchWrapper productSearchWrapper = new ProductSearchWrapper(product, search_key);
+                if (productSearchWrapper.getMatch() > 0)
+                    productSearchWrappers.add(productSearchWrapper);
+            }
+            productSearchWrappers.sort((w1, w2) -> (int) (w2.getMatch() - w1.getMatch()));
+            response.getWriter().println((new Gson()).toJson(productSearchWrappers));
+        }
     }
 
     private ArrayList<Product> getAllProducts(String allProductString) throws ParseException {

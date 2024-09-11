@@ -1,8 +1,6 @@
 package org.example.pluto.model;
 import lombok.Getter;
 
-import java.util.Arrays;
-
 @Getter
 public class Product {
     private final int id;
@@ -38,20 +36,4 @@ public class Product {
         this.unitMrp = unitMrp;
     }
 
-    public void display() {
-        System.out.println("ID = " + id);
-        System.out.println("NAME = " + name);
-        System.out.println("DESCRIPTION = " + description);
-        System.out.println("INVENTORY_COUNT = " + inventoryCount);
-        System.out.println("ISBUYABLE = " + isBuyable);
-        System.out.println("ISRESTRICTED = " + isRestricted);
-        System.out.println("IMAGEKEY = " + imageKey);
-        System.out.println("UNIT = " + unit);
-        System.out.println("UNITCOST = " + unitCost);
-        System.out.println("UNITDISCOUNT = " + unitDiscount);
-        System.out.println("UNITMRP = " + unitMrp);
-        System.out.println("KEYWORDS = " + Arrays.toString(keywords));
-        System.out.println("TAGS = " + Arrays.toString(tags));
-        System.out.println();
-    }
 }
