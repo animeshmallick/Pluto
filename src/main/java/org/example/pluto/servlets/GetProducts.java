@@ -3,6 +3,7 @@ package org.example.pluto.servlets;
 import com.google.gson.Gson;
 import org.example.pluto.common.GetProductsLambdaFunction;
 import org.example.pluto.config.Constants;
+import org.example.pluto.config.GetProductCustomParameters;
 import org.example.pluto.model.Product;
 import org.example.pluto.model.ProductSearchWrapper;
 import org.json.simple.JSONArray;
@@ -38,8 +39,14 @@ public class GetProducts extends HttpServlet {
             ArrayList<ProductSearchWrapper> productSearchWrappers = new ArrayList<>();
             for (Product product : products) {
                 ProductSearchWrapper productSearchWrapper = new ProductSearchWrapper(product, search_key);
-                if (productSearchWrapper.getMatch() > 0)
+                if (request.getParameterMap().containsKey(GetProductCustomParameters.GOOD_MATCH.name().toLowerCase()) &&
+                        request.getParameter(GetProductCustomParameters.GOOD_MATCH.name().toLowerCase()).equals("true")) {
+                    if (productSearchWrapper.getMatch() > 0)
+                        productSearchWrappers.add(productSearchWrapper);
+                }
+                else{
                     productSearchWrappers.add(productSearchWrapper);
+                }
             }
             productSearchWrappers.sort((w1, w2) -> (int) (w2.getMatch() - w1.getMatch()));
             response.getWriter().println((new Gson()).toJson(productSearchWrappers));
