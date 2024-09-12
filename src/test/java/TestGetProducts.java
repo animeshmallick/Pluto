@@ -7,15 +7,15 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class TestGetProducts extends TestHelper{
-    @DataProvider(name = "GetAllProducts")
-    public String[] getProducts() {
+    @DataProvider(name = "getUrls")
+    public String[] getUrls() {
         return new String[]{
                 "http://localhost:8080/Pluto/GetProducts",
                 "http://43.205.135.121:8080/Pluto/GetProducts"
         };
     }
 
-    @Test(dataProvider = "GetAllProducts")
+    @Test(dataProvider = "getUrls")
     public void test_get_all_products(String url) {
         System.out.println("Validating : " + url);
         String actualJsonResponse = getResponseFromURL(url);
