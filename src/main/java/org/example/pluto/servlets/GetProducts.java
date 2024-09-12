@@ -33,7 +33,15 @@ public class GetProducts extends HttpServlet {
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
-
+        if (!request.getParameterMap().containsKey(GetProductCustomParameters.INCLUDE_OUT_OF_STOCK.name().toLowerCase()) ||
+                !request.getParameter(GetProductCustomParameters.INCLUDE_OUT_OF_STOCK.name().toLowerCase()).equals("true")) {
+            for (int i = 0; i < products.size(); i++) {
+                if (products.get(i).getInventoryCount() <= 0) {
+                    products.remove(i);
+                    i--;
+                }
+            }
+        }
         String[] search_key = getSearchKey(request.getPathInfo());
         if (search_key == null || search_key.length == 0)
             response.getWriter().println((new Gson()).toJson(products));
@@ -49,6 +57,7 @@ public class GetProducts extends HttpServlet {
             if (request.getParameterMap().containsKey(GetProductCustomParameters.GOOD_MATCH.name().toLowerCase()) &&
                     request.getParameter(GetProductCustomParameters.GOOD_MATCH.name().toLowerCase()).equals("true")) {
                 for (int i = 0; i < productSearchWrappersClone.size(); i++) {
+
                     if (productSearchWrappersClone.get(i).getMatch() <= 0) {
                         productSearchWrappersClone.remove(i);
                         i--;
