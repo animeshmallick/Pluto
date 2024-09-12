@@ -1,0 +1,15 @@
+{
+  "id": 2,
+  "name": "Banana",
+  "description": "normal banana pack of 4",
+  "inventoryCount": 10,
+  "isBuyable": false,
+  "isRestricted": false,
+  "imageKey": "Not Set",
+  "keywords": [],
+  "tags": [],
+  "unit": "Pack of 4",
+  "unitCost": 20,
+  "unitDiscount": 0,
+  "unitMrp": 30
+}

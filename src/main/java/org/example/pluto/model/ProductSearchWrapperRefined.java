@@ -6,8 +6,8 @@ import java.util.ArrayList;
 
 @Getter
 public class ProductSearchWrapperRefined {
-    private ArrayList<ProductSearchWrapper> primary;
-    private ArrayList<ProductSearchWrapper> secondary;
+    private final ArrayList<ProductSearchWrapper> primary;
+    private final ArrayList<ProductSearchWrapper> secondary;
 
     public ProductSearchWrapperRefined() {
         this.primary = new ArrayList<>();
