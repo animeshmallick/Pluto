@@ -8,8 +8,11 @@ import org.json.simple.parser.ParseException;
 
 public class LoginLambdaFunction extends Common {
     private final String loginLambdaEndPoint;
+    private final String validateUserLambdaEndPoint;
+
     public LoginLambdaFunction() {
         this.loginLambdaEndPoint = LambdaEndpoints.Login.getEndpoint();
+        this.validateUserLambdaEndPoint = LambdaEndpoints.ValidateUser.getEndpoint();
     }
 
     public User login(String username, String password) {
@@ -29,5 +32,10 @@ public class LoginLambdaFunction extends Common {
                         user.get("username").toString(), Integer.parseInt(user.get("age").toString()),
                         user.get("email").toString(), user.get("phone").toString(),
                         user.get("type").toString());
+    }
+
+    public User validateUser(String username){
+        String validateUserUrl = String.format("%s/%s", validateUserLambdaEndPoint, username);
+        return getLoginUser(Common.getResponseFromURL(validateUserUrl));
     }
 }

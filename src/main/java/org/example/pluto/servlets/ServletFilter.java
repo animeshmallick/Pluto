@@ -1,6 +1,8 @@
 package org.example.pluto.servlets;
 
 import com.google.gson.Gson;
+import org.example.pluto.common.LoginLambdaFunction;
+import org.example.pluto.model.User;
 import org.json.simple.JSONObject;
 
 import javax.servlet.*;
@@ -46,7 +48,15 @@ public class ServletFilter implements Filter {
             Cookie[] cookies = ((HttpServletRequest) request).getCookies();
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals("auth_user_id")) {
-                    return true;
+                    String[] value = cookie.getValue().split("@");
+                    if (value.length != 2)
+                        return false;
+                    String username = value[0];
+                    int hashedUsername = Integer.parseInt(value[1]);
+                    if (username.hashCode() != hashedUsername)
+                        return false;
+                    User user = (new LoginLambdaFunction()).validateUser(username);
+                    return user != null;
                 }
             }
             return false;

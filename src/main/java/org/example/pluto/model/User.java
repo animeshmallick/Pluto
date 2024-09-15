@@ -12,7 +12,7 @@ public class User {
     private final String email;
     private final String phone;
     private final String type;
-    private final String hashCode;
+    private final int hashCode;
 
     public User(String fname, String lname, String username, int age, String email, String phone, String type) {
         this.id = username;
@@ -23,6 +23,6 @@ public class User {
         this.email = email;
         this.phone = phone;
         this.type = type;
-        this.hashCode = Integer.toOctalString(username.hashCode()).toLowerCase();
+        this.hashCode = username.hashCode();
     }
 }

@@ -28,7 +28,7 @@ public class Login extends HttpServlet {
                 response.getWriter().write(obj.toJSONString());
             }else {
                 //Add auth cookie
-                Cookie auth_cookie = new Cookie("auth_user_id", user.getHashCode());
+                Cookie auth_cookie = new Cookie("auth_user_id", String.format("%s@%s", user.getId(), user.getHashCode()));
                 auth_cookie.setMaxAge(3600*12);
                 auth_cookie.setSecure(true);
                 auth_cookie.setDomain(request.getServerName());
