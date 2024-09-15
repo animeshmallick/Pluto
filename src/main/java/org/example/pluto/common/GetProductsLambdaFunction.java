@@ -1,32 +1,63 @@
 package org.example.pluto.common;
 
 import org.example.pluto.config.LambdaEndpoints;
+import org.example.pluto.model.Product;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.util.ArrayList;
 
-public class GetProductsLambdaFunction {
+public class GetProductsLambdaFunction extends Common {
     private final String getProductLambdaEndPoint;
 
     public GetProductsLambdaFunction(){
         this.getProductLambdaEndPoint = LambdaEndpoints.GetProducts.getEndpoint();
     }
-
-    public String getAllProducts(){
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest api_request = HttpRequest.newBuilder()
-                .uri(URI.create(this.getProductLambdaEndPoint))
-                .build();
-
-        HttpResponse<String> api_response;
+    public ArrayList<Product> getProducts() {
+        return getProductsFromString(Common.getResponseFromURL(getProductLambdaEndPoint));
+    }
+    private ArrayList<Product> getProductsFromString(String allProductString) {
+        JSONArray products = null;
         try {
-            api_response = client.send(api_request, HttpResponse.BodyHandlers.ofString());
-        } catch (InterruptedException | IOException e) {
-            throw new RuntimeException(e);
+            products = (JSONArray) (new JSONParser()).parse(allProductString);
+        }catch (ParseException e){
+            return null;
         }
-        return api_response.body();
+        ArrayList<Product> productList = new ArrayList<>();
+        for (Object obj : products) {
+            JSONObject productJSON = (JSONObject) obj;
+
+            productList.add(
+                    new Product(
+                            Double.parseDouble(productJSON.get("productUnitDiscount").toString()),
+                            productJSON.get("productImageKey").toString(),
+                            Double.parseDouble(productJSON.get("productUnitCost").toString()),
+                            Boolean.parseBoolean(productJSON.get("productIsRestricted").toString()),
+                            getStringArray(productJSON.get("productTags").toString()),
+                            productJSON.get("productDescription").toString(),
+                            Double.parseDouble(productJSON.get("productUnitMRP").toString()),
+                            getStringArray(productJSON.get("productKeywords").toString()),
+                            Integer.parseInt(productJSON.get("productInventory").toString()),
+                            productJSON.get("productUnit").toString(),
+                            Integer.parseInt(productJSON.get("productId").toString()),
+                            Boolean.parseBoolean(productJSON.get("productIsBuyable").toString()),
+                            productJSON.get("productName").toString()
+                    ));
+        }
+        return productList;
+    }
+
+    private String[] getStringArray(String str){
+        str = str.replace("[", "")
+                .replace("]", "")
+                .replace("\"", "");
+        String[] temp = str.split(",");
+        ArrayList<String> result = new ArrayList<>();
+        for (String k : temp) {
+            result.add(k.trim());
+        }
+        return result.toArray(new String[0]);
     }
 }

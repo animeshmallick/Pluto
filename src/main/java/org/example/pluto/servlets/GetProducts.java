@@ -7,10 +7,7 @@ import org.example.pluto.config.GetProductCustomParameters;
 import org.example.pluto.model.Product;
 import org.example.pluto.model.ProductSearchWrapper;
 import org.example.pluto.model.ProductSearchWrapperRefined;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.jetbrains.annotations.NotNull;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -21,18 +18,12 @@ import java.util.List;
 
 @WebServlet(name = "GetProducts", value = "/GetProducts/*")
 public class GetProducts extends HttpServlet {
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+    protected void doGet(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response) throws IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
+        ArrayList<Product> products = (new GetProductsLambdaFunction()).getProducts();
 
-        String allProductString = (new GetProductsLambdaFunction()).getAllProducts();
-
-        ArrayList<Product> products;
-        try {
-            products = getAllProducts(allProductString);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
         if (!request.getParameterMap().containsKey(GetProductCustomParameters.INCLUDE_OUT_OF_STOCK.name().toLowerCase()) ||
                 !request.getParameter(GetProductCustomParameters.INCLUDE_OUT_OF_STOCK.name().toLowerCase()).equals("true")) {
             for (int i = 0; i < products.size(); i++) {
@@ -90,43 +81,6 @@ public class GetProducts extends HttpServlet {
             if(!responded)
                 response.getWriter().println((new Gson()).toJson(productSearchWrappersClone));
         }
-    }
-    private ArrayList<Product> getAllProducts(String allProductString) throws ParseException {
-        JSONArray products = (JSONArray) (new JSONParser()).parse(allProductString);
-        ArrayList<Product> productList = new ArrayList<>();
-        for (Object obj : products) {
-            JSONObject productJSON = (JSONObject) obj;
-
-            productList.add(
-                    new Product(
-                            Double.parseDouble(productJSON.get("productUnitDiscount").toString()),
-                            productJSON.get("productImageKey").toString(),
-                            Double.parseDouble(productJSON.get("productUnitCost").toString()),
-                            Boolean.parseBoolean(productJSON.get("productIsRestricted").toString()),
-                            getStringArray(productJSON.get("productTags").toString()),
-                            productJSON.get("productDescription").toString(),
-                            Double.parseDouble(productJSON.get("productUnitMRP").toString()),
-                            getStringArray(productJSON.get("productKeywords").toString()),
-                            Integer.parseInt(productJSON.get("productInventory").toString()),
-                            productJSON.get("productUnit").toString(),
-                            Integer.parseInt(productJSON.get("productId").toString()),
-                            Boolean.parseBoolean(productJSON.get("productIsBuyable").toString()),
-                            productJSON.get("productName").toString()
-                    ));
-        }
-        return productList;
-    }
-
-    private String[] getStringArray(String str){
-        str = str.replace("[", "")
-                .replace("]", "")
-                .replace("\"", "");
-        String[] temp = str.split(",");
-        ArrayList<String> result = new ArrayList<>();
-        for (String k : temp) {
-            result.add(k.trim());
-        }
-        return result.toArray(new String[0]);
     }
 
     private String[] getSearchKey(String pathInfo) {
