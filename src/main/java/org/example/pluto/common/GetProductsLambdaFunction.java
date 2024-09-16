@@ -19,7 +19,7 @@ public class GetProductsLambdaFunction extends Common {
         return getProductsFromString(Common.getResponseFromURL(getProductLambdaEndPoint));
     }
     private ArrayList<Product> getProductsFromString(String allProductString) {
-        JSONArray products = null;
+        JSONArray products;
         try {
             products = (JSONArray) (new JSONParser()).parse(allProductString);
         }catch (ParseException e){

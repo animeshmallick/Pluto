@@ -6,10 +6,7 @@ import org.example.pluto.model.User;
 import org.json.simple.JSONObject;
 
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 import java.io.IOException;
 
 @WebServlet(name = "Login", value = "/Login")
@@ -24,26 +21,48 @@ public class Login extends HttpServlet {
             User user = (new LoginLambdaFunction()).login(username, password);
             if (user == null) {
                 JSONObject obj = new JSONObject();
+                //noinspection unchecked
                 obj.put("error", "No Users Found with given username and password pair");
                 response.getWriter().write(obj.toJSONString());
             }else {
-                //Add auth cookie
-                Cookie auth_cookie = new Cookie("auth_user_id", String.format("%s@%s", user.getId(), user.getHashCode()));
-                auth_cookie.setMaxAge(3600*12);
-                auth_cookie.setSecure(true);
-                auth_cookie.setDomain(request.getServerName());
-                auth_cookie.setPath(request.getContextPath());
-                response.addCookie(auth_cookie);
+                request.getSession().setAttribute("auth_user_id", String.format("%s@%s", user.getId(), user.getHashCode()));
                 JSONObject obj = new JSONObject();
+                //noinspection unchecked
                 obj.put("success", "Successfully logged in");
+                //noinspection unchecked
                 obj.put("user", user);
                 response.getWriter().println((new Gson()).toJson(obj));
                 response.setStatus(HttpServletResponse.SC_OK);
             }
         }else{
             JSONObject obj = new JSONObject();
+            //noinspection unchecked
             obj.put("error", "username and password field not found");
             response.getWriter().println((new Gson()).toJson(obj));
         }
+    }
+
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        HttpSession session = request.getSession(false);
+        JSONObject obj = new JSONObject();
+
+        if (session == null) {
+            //noinspection unchecked
+            obj.put("message", "Invalid Session. Login and try again");
+        }else {
+            String auth_user_id = (String) session.getAttribute("auth_user_id");
+            if (auth_user_id == null) {
+                //noinspection unchecked
+                obj.put("message", "No users logged in. Login and try again");
+            }
+            else {
+                //noinspection unchecked
+                obj.put("message", "User logged in as " + auth_user_id);
+            }
+        }
+        response.getWriter().println((new Gson()).toJson(obj));
     }
 }

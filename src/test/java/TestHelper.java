@@ -5,28 +5,33 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.testng.Assert;
 
+import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.io.InputStreamReader;
+import java.net.*;
 
 @Slf4j
 public class TestHelper {
     public String getResponseFromURL(String url) {
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest api_request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .build();
-
-        HttpResponse<String> api_response;
         try {
-            api_response = client.send(api_request, HttpResponse.BodyHandlers.ofString());
-        } catch (InterruptedException | IOException e) {
-            throw new RuntimeException(e);
-        }
-        return api_response.body();
+            HttpURLConnection connection = (HttpURLConnection) (new URL(url)).openConnection();
+
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Cookie", "auth_user_id=admin@92668751");
+
+            Assert.assertEquals(connection.getResponseCode(), 200, "ResponseCode not as expected");
+
+            StringBuilder response = new StringBuilder();
+            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String line;
+            while ((line = br.readLine()) != null) {
+                response.append(line);
+            }
+            return response.toString();
+        } catch (IOException e) {return e.getMessage();}
     }
     protected JSONObject getExpectedResponseFromResource(String responseFile){
         JSONObject expectedJsonResponse = null;
@@ -51,7 +56,7 @@ public class TestHelper {
             }
             Object value = actual.get(key);
             if (value instanceof JSONArray){
-                if(!validateJsonArray((JSONArray) value, (JSONArray) expected.get(key))) {
+                if(validateJsonArray((JSONArray) value, (JSONArray) expected.get(key))) {
                     System.out.println("JSON Array not equals" + value);
                     return false;
                 }
@@ -75,24 +80,24 @@ public class TestHelper {
         if(!expected.isEmpty()){
             if (actual.size() != expected.size()) {
                 System.out.println("Actual array size not equals" + actual + " != " + expected);
-                return false;
+                return true;
             }
         }
 
         for(int i=0; i<actual.size(); i++){
             if (actual.get(i) instanceof JSONArray) {
-                if (!validateJsonArray((JSONArray) actual.get(i), (JSONArray) expected.get(i)))
-                    return false;
+                if (validateJsonArray((JSONArray) actual.get(i), (JSONArray) expected.get(i)))
+                    return true;
             }
             else if (actual.get(i) instanceof JSONObject) {
-                if (!isSimilarJson((JSONObject) actual.get(i), (JSONObject) expected.get(i)))
-                    return false;
+                if (isSimilarJson((JSONObject) actual.get(i), (JSONObject) expected.get(i)))
+                    return true;
             }
             else {
                 if (actual.get(i) == null)
-                    return false;
+                    return true;
             }
         }
-        return true;
+        return false;
     }
 }
